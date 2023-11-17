@@ -31,7 +31,12 @@ export async function sendPushNotification(expoPushToken: any) {
     body: JSON.stringify(message),
   });
 }
-
+export async function getPushToken() {
+  const token = await Notifications.getExpoPushTokenAsync({
+    projectId: Constants?.expoConfig?.extra?.eas.projectId,
+  });
+  return token;
+}
 export async function registerForPushNotificationsAsync() {
   let token;
 
@@ -56,9 +61,7 @@ export async function registerForPushNotificationsAsync() {
       const { status } = await Notifications.requestPermissionsAsync();
       finalStatus = status;
     }
-    token = await Notifications.getExpoPushTokenAsync({
-      projectId: Constants?.expoConfig?.extra?.eas.projectId,
-    });
+    token = await getPushToken();
     // console.log(token);
   } else {
     alert("Must use physical device for Push Notifications");
