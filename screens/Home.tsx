@@ -15,7 +15,9 @@ export default function Home({ navigation }: HomeScreenProps) {
   }
   async function onMessage(e: WebViewMessageEvent) {
     const data = e.nativeEvent.data; // 로그인 하기
-    console.log(data);
+    if (data === "camera") {
+      navigation.navigate("Camera");
+    }
   }
   return (
     <View style={{ flex: 1 }}>
