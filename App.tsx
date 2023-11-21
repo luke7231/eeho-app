@@ -24,10 +24,7 @@ export default function App() {
   }, []);
   return (
     <>
-      <StatusBar backgroundColor={NOTCH_COLOR} barStyle={"dark-content"} />
-      <SafeAreaView style={styles.safeAreaView}>
-        <Navigation />
-      </SafeAreaView>
+      <Navigation />
     </>
   );
 }
