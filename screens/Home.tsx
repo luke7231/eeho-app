@@ -1,4 +1,11 @@
-import { BackHandler, Button, Text, View } from "react-native";
+import {
+  BackHandler,
+  Button,
+  SafeAreaView,
+  StatusBar,
+  Text,
+  View,
+} from "react-native";
 import WebView, { WebViewMessageEvent } from "react-native-webview";
 import { Camera } from "expo-camera";
 import { StackScreenProps } from "@react-navigation/stack";
@@ -7,6 +14,7 @@ import { registerForPushNotificationsAsync } from "../utils/push-notification";
 import { useEffect, useRef } from "react";
 import * as Notifications from "expo-notifications";
 import { useAndroidBackEffect } from "../hooks/useAndroidBackEffect";
+import styles, { NOTCH_COLOR } from "../styles";
 export type HomeScreenProps = StackScreenProps<RootStackParamList, "Home">;
 
 export default function Home({ navigation }: HomeScreenProps) {
@@ -39,12 +47,18 @@ export default function Home({ navigation }: HomeScreenProps) {
     });
   }, [webViewRef.current]);
   return (
-    <View style={{ flex: 1 }}>
-      <WebView
-        ref={webViewRef}
-        source={{ uri: "http://172.16.225.128:3000" }}
-        onMessage={onMessage}
-      />
-    </View>
+    <>
+      <StatusBar backgroundColor={NOTCH_COLOR} barStyle={"dark-content"} />
+      <SafeAreaView style={styles.safeAreaView}>
+        <View style={{ flex: 1 }}>
+          {/* <Button title="To Camera" onPress={() => navigation.navigate("Camera")} /> */}
+          <WebView
+            ref={webViewRef}
+            source={{ uri: "http://172.16.225.128:3000" }}
+            onMessage={onMessage}
+          />
+        </View>
+      </SafeAreaView>
+    </>
   );
 }
