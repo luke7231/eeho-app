@@ -1,5 +1,8 @@
 import { Camera, CameraType } from "expo-camera";
-import { useEffect, useState } from "react";
+import * as FileSystem from "expo-file-system";
+import { useEffect, useRef, useState } from "react";
+import globalStyles, { CAMERA_NOTCH_COLOR } from "../../styles";
+
 import {
   Button,
   Image,
@@ -9,10 +12,12 @@ import {
   TouchableOpacity,
   View,
   StatusBar,
+  ViewProps,
 } from "react-native";
 import { RootStackParamList } from "../../types";
 import { StackNavigationProp, StackScreenProps } from "@react-navigation/stack";
 import { RouteProp } from "@react-navigation/native";
+import ViewShot from "react-native-view-shot";
 
 type CameraScreenRouteProp = RouteProp<RootStackParamList, "Camera">;
 type CameraScreenNavigationProp = StackNavigationProp<
@@ -26,14 +31,16 @@ type Props = {
 };
 
 export default function CameraPage({ route, navigation }: Props) {
-  console.log(route.params);
+  const captureRef = useRef(null);
+  const token = route.params.token;
+  const receiverIds = route.params.userIds;
+
   const [cameraType, setType] = useState(CameraType.back);
   const [frontReady, setFrontReady] = useState(false);
 
   // const [permission, requestPermission] = Camera.useCameraPermissions();
   const [camera, setCamera] = useState<Camera | null>(null);
   const [camera2, setCamera2] = useState<Camera | null>(null);
-
   const [backImage, setBackImage] = useState<string | null>(null);
   const [frontImage, setFrontImage] = useState<string | null>(null);
 
@@ -49,7 +56,9 @@ export default function CameraPage({ route, navigation }: Props) {
 
   async function takeBackPicture() {
     if (camera) {
-      const data = await camera.takePictureAsync({ isImageMirror: false });
+      const data = await camera.takePictureAsync({
+        isImageMirror: false,
+      });
       setBackImage(data.uri);
       setFrontReady(true);
       toggleCameraType();
@@ -57,10 +66,17 @@ export default function CameraPage({ route, navigation }: Props) {
   }
   async function takeFrontPicture() {
     if (camera2) {
-      const data = await camera2.takePictureAsync({ isImageMirror: false });
+      const data = await camera2.takePictureAsync({
+        isImageMirror: false,
+      });
       setFrontImage(data.uri);
     }
   }
+  const getPhotoUri = async (): Promise<string> => {
+    const uri = await (captureRef.current as any).capture();
+    console.log("😍" + uri);
+    return uri;
+  };
   // 바뀌는 포인트를 잡아햐는데.. 00
   // 첫 번째 노출 00
   // 첫 번쨰 찍기 00
@@ -68,48 +84,85 @@ export default function CameraPage({ route, navigation }: Props) {
   // 두 번째 오픈 ? 00
   // 두 번째 찍ㅣ 00
   // 두 번째 상태 지우기 -> 업로드 이동..
-
-  const clickUsePhoto = () => {
-    fetch;
+  // console.log(receiverIds);
+  // console.log(backImage);
+  // console.log(frontImage);
+  const onClickReTakePhoto = () => {
+    setBackImage(null);
+    setFrontImage(null);
+    setFrontReady(false);
+    toggleCameraType();
   };
+  const clickUsePhoto = async () => {
+    const capturedPath = await getPhotoUri();
+    const updatedPath = capturedPath.replace("/private/", "file:///");
+    FileSystem.uploadAsync(
+      "http://172.16.230.168:8080/album/image/upload",
+      updatedPath,
+      {
+        fieldName: "profile",
+        headers: { token },
+        httpMethod: "POST",
+        uploadType: FileSystem.FileSystemUploadType.MULTIPART,
+        parameters: {
+          receiverIds: JSON.stringify(receiverIds),
+        },
+      }
+    ).then((res) => console.log(res));
+  };
+
   return (
     <>
-      <StatusBar barStyle="dark-content" />
-      <SafeAreaView style={{ flex: 1, backgroundColor: "black" }}>
+      <StatusBar
+        backgroundColor={CAMERA_NOTCH_COLOR}
+        barStyle={"dark-content"}
+      />
+      <SafeAreaView style={globalStyles.cameraSafeAreaView}>
         <View style={styles.container}>
-          {/* BackCamera */}
-          {backImage ? (
-            <Image source={{ uri: backImage }} style={{ flex: 1 }} />
-          ) : (
-            <Camera
-              ref={(ref) => setCamera(ref)}
-              style={styles.camera}
-              type={cameraType}
-            ></Camera>
-          )}
+          <ViewShot ref={captureRef} style={styles.viewShot}>
+            {/* BackCamera */}
+            {backImage ? (
+              <Image source={{ uri: backImage }} style={{ flex: 1 }} />
+            ) : (
+              <Camera
+                ref={(ref) => setCamera(ref)}
+                style={styles.camera}
+                type={cameraType}
+              ></Camera>
+            )}
 
-          <View style={styles.diagonal}></View>
+            {/* FrontCamera */}
 
-          {/* FrontCamera */}
+            {frontReady && !frontImage && (
+              <Camera
+                ref={(ref) => setCamera2(ref)}
+                style={styles.camera}
+                type={cameraType}
+              ></Camera>
+            )}
+            {!frontReady && !frontImage && (
+              <View style={styles.cover}>
+                <Image
+                  source={require("../../assets/EEHO_LOGO.png")}
+                  style={styles.logo}
+                />
+              </View>
+            )}
+            {frontImage && (
+              <Image source={{ uri: frontImage }} style={{ flex: 1 }} />
+            )}
+          </ViewShot>
 
-          {frontReady && !frontImage && (
-            <Camera
-              ref={(ref) => setCamera2(ref)}
-              style={styles.camera}
-              type={cameraType}
-            ></Camera>
-          )}
-          {!frontReady && !frontImage && (
-            <View style={{ flex: 1, backgroundColor: "black" }}></View>
-          )}
-          {frontImage && (
-            <Image source={{ uri: frontImage }} style={{ flex: 1 }} />
-          )}
+          {/* <Button title="클릭 시 캡처" onPress={getPhotoUri} /> */}
 
           {backImage && frontImage ? (
             <View style={styles.resultBar}>
-              <Text style={styles.resultText}>다시 찍기</Text>
-              <Text style={styles.resultText}>사진 사용</Text>
+              <Text style={styles.resultText} onPress={onClickReTakePhoto}>
+                다시 찍기
+              </Text>
+              <Text style={styles.resultText} onPress={clickUsePhoto}>
+                사진 사용
+              </Text>
             </View>
           ) : (
             <View style={styles.buttonContainer}>
@@ -118,7 +171,7 @@ export default function CameraPage({ route, navigation }: Props) {
                 onPress={backImage ? takeFrontPicture : takeBackPicture}
               >
                 <View style={styles.shotButton}>
-                  <Text>EEHO</Text>
+                  <Text style={styles.shotText}>{backImage ? 2 : 1}</Text>
                 </View>
               </TouchableOpacity>
             </View>
@@ -132,21 +185,35 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "center",
-    backgroundColor: "#462D2D",
+    backgroundColor: "#162A0C",
     padding: 20,
+  },
+  viewShot: {
+    flex: 1,
+    justifyContent: "center",
+    backgroundColor: "#162A0C",
+    borderWidth: 5,
+    borderColor: "#fff",
+    borderStyle: "solid",
+    // marginBottom: 38,
   },
   camera: {
     flex: 1,
+  },
+  cover: {
+    flex: 1,
+    backgroundColor: "#FFFFFF4D",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  logo: {
+    height: 68,
+    objectFit: "contain",
   },
   buttonContainer: {
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "transparent",
-  },
-  diagonal: {
-    borderTopWidth: 2,
-    borderBottomWidth: 2,
-    borderColor: "#462D2D",
   },
   button: {
     alignItems: "center",
@@ -159,12 +226,20 @@ const styles = StyleSheet.create({
     color: "white",
   },
   shotButton: {
-    width: 70,
-    height: 70,
-    backgroundColor: "white",
+    width: 78,
+    height: 78,
+    backgroundColor: "#162A0C",
+    borderWidth: 5,
+    borderColor: "#fff",
+    borderStyle: "solid",
     borderRadius: 50,
     alignItems: "center",
     justifyContent: "center",
+    marginTop: 20,
+  },
+  shotText: {
+    fontSize: 36,
+    color: "#fff",
   },
   resultBar: {
     flexDirection: "row",
