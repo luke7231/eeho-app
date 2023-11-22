@@ -59,10 +59,11 @@ export default function Home({ navigation }: HomeScreenProps) {
     }
 
     Notifications.addNotificationResponseReceivedListener((response) => {
-      console.log(response.notification.request.content);
       // from: userId
       // userId로 보낸다.
-      naviToCamera([response.notification.request.content.data.from]);
+      if (response.notification.request.content.data.from) {
+        naviToCamera([response.notification.request.content.data.from]);
+      }
     });
   }, [webViewRef.current]);
   return (
@@ -73,7 +74,7 @@ export default function Home({ navigation }: HomeScreenProps) {
           {/* <Button title="To Camera" onPress={() => navigation.navigate("Camera")} /> */}
           <WebView
             ref={webViewRef}
-            source={{ uri: "http://172.16.225.128:3000" }}
+            source={{ uri: "http://172.16.231.51:3000" }}
             onMessage={onMessage}
           />
         </View>
