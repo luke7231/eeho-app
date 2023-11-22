@@ -13,6 +13,7 @@ import {
   View,
   StatusBar,
   ViewProps,
+  ActivityIndicator,
 } from "react-native";
 import { RootStackParamList } from "../../types";
 import { StackNavigationProp, StackScreenProps } from "@react-navigation/stack";
@@ -43,11 +44,9 @@ export default function CameraPage({ route, navigation }: Props) {
   const [camera2, setCamera2] = useState<Camera | null>(null);
   const [backImage, setBackImage] = useState<string | null>(null);
   const [frontImage, setFrontImage] = useState<string | null>(null);
+  const [canTakeShot, setCanTakeShot] = useState(true);
+  const [submitLoading, setSubmitLoading] = useState(false);
 
-  // if (!permission?.granted) {
-  //   // Camera permissions are not granted yet
-  //   requestPermission();
-  // }
   function toggleCameraType() {
     setType((current) =>
       current === CameraType.back ? CameraType.front : CameraType.back
@@ -55,21 +54,25 @@ export default function CameraPage({ route, navigation }: Props) {
   }
 
   async function takeBackPicture() {
+    setCanTakeShot(false);
     if (camera) {
       const data = await camera.takePictureAsync({
         isImageMirror: false,
       });
       setBackImage(data.uri);
       setFrontReady(true);
+      setCanTakeShot(true);
       toggleCameraType();
     }
   }
   async function takeFrontPicture() {
+    setCanTakeShot(false);
     if (camera2) {
       const data = await camera2.takePictureAsync({
         isImageMirror: false,
       });
       setFrontImage(data.uri);
+      setCanTakeShot(true);
     }
   }
   const getPhotoUri = async (): Promise<string> => {
@@ -94,6 +97,7 @@ export default function CameraPage({ route, navigation }: Props) {
     toggleCameraType();
   };
   const clickUsePhoto = async () => {
+    setSubmitLoading(true);
     const capturedPath = await getPhotoUri();
     const updatedPath = capturedPath.replace("/private/", "file:///");
     FileSystem.uploadAsync(
@@ -108,7 +112,17 @@ export default function CameraPage({ route, navigation }: Props) {
           receiverIds: JSON.stringify(receiverIds),
         },
       }
-    ).then((res) => console.log(res));
+    )
+      .then((res) => {
+        return JSON.parse(res.body);
+      })
+      .then((data) => {
+        if (data.ok) {
+          navigation.navigate("Home");
+        } else {
+          navigation.navigate("Home");
+        }
+      });
   };
 
   return (
@@ -128,6 +142,7 @@ export default function CameraPage({ route, navigation }: Props) {
                 ref={(ref) => setCamera(ref)}
                 style={styles.camera}
                 type={cameraType}
+                ratio="1:1"
               ></Camera>
             )}
 
@@ -138,6 +153,7 @@ export default function CameraPage({ route, navigation }: Props) {
                 ref={(ref) => setCamera2(ref)}
                 style={styles.camera}
                 type={cameraType}
+                ratio="1:1"
               ></Camera>
             )}
             {!frontReady && !frontImage && (
@@ -156,24 +172,35 @@ export default function CameraPage({ route, navigation }: Props) {
           {/* <Button title="클릭 시 캡처" onPress={getPhotoUri} /> */}
 
           {backImage && frontImage ? (
-            <View style={styles.resultBar}>
-              <Text style={styles.resultText} onPress={onClickReTakePhoto}>
-                다시 찍기
-              </Text>
-              <Text style={styles.resultText} onPress={clickUsePhoto}>
-                사진 사용
-              </Text>
-            </View>
+            submitLoading ? (
+              <ActivityIndicator size="large" style={{ marginTop: 12 }} />
+            ) : (
+              <View style={styles.resultBar}>
+                <Text style={styles.resultText} onPress={onClickReTakePhoto}>
+                  다시 찍기
+                </Text>
+                <Text style={styles.resultText} onPress={clickUsePhoto}>
+                  사진 사용
+                </Text>
+              </View>
+            )
           ) : (
             <View style={styles.buttonContainer}>
-              <TouchableOpacity
-                style={styles.button}
-                onPress={backImage ? takeFrontPicture : takeBackPicture}
-              >
-                <View style={styles.shotButton}>
-                  <Text style={styles.shotText}>{backImage ? 2 : 1}</Text>
-                </View>
-              </TouchableOpacity>
+              {canTakeShot ? (
+                <TouchableOpacity
+                  style={styles.button}
+                  onPress={backImage ? takeFrontPicture : takeBackPicture}
+                >
+                  <View style={styles.shotButton}>
+                    <Text style={styles.shotText}>{backImage ? 2 : 1}</Text>
+                  </View>
+                </TouchableOpacity>
+              ) : (
+                <ActivityIndicator
+                  size="large"
+                  style={{ marginTop: 44, marginBottom: 10 }}
+                />
+              )}
             </View>
           )}
         </View>
