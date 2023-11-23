@@ -1,11 +1,4 @@
-import {
-  BackHandler,
-  Button,
-  SafeAreaView,
-  StatusBar,
-  Text,
-  View,
-} from "react-native";
+import { SafeAreaView, StatusBar, Text, View } from "react-native";
 import WebView, { WebViewMessageEvent } from "react-native-webview";
 import { Camera } from "expo-camera";
 import { StackScreenProps } from "@react-navigation/stack";
@@ -33,6 +26,11 @@ export default function Home({ navigation }: HomeScreenProps) {
       const stringValue = JSON.stringify(parsedData.payload.token);
       await AsyncStorage.setItem("jwt", stringValue);
     }
+    // else if (parsedData.type === "clear_history") {
+    //   if (webViewRef.current && webViewRef.current.clearHistory) {
+    //     webViewRef.current.clearHistory();
+    //   }
+    // }
   }
   const sendPostMessage = (token: string) => {
     webViewRef.current?.postMessage(token);
@@ -71,10 +69,10 @@ export default function Home({ navigation }: HomeScreenProps) {
       <StatusBar backgroundColor={NOTCH_COLOR} barStyle={"dark-content"} />
       <SafeAreaView style={styles.safeAreaView}>
         <View style={{ flex: 1 }}>
-          {/* <Button title="To Camera" onPress={() => navigation.navigate("Camera")} /> */}
           <WebView
             ref={webViewRef}
             source={{ uri: "http://172.16.231.51:3000" }}
+            // source={{ uri: "https://eeho-web.vercel.app" }}
             onMessage={onMessage}
           />
         </View>
