@@ -61,7 +61,6 @@ export default function CameraPage({ route, navigation }: Props) {
       });
       setBackImage(data.uri);
       setFrontReady(true);
-      setCanTakeShot(true);
       toggleCameraType();
     }
   }
@@ -80,20 +79,12 @@ export default function CameraPage({ route, navigation }: Props) {
     console.log("😍" + uri);
     return uri;
   };
-  // 바뀌는 포인트를 잡아햐는데.. 00
-  // 첫 번째 노출 00
-  // 첫 번쨰 찍기 00
-  // 첫 번째 상태 지우기 00
-  // 두 번째 오픈 ? 00
-  // 두 번째 찍ㅣ 00
-  // 두 번째 상태 지우기 -> 업로드 이동..
-  // console.log(receiverIds);
-  // console.log(backImage);
-  // console.log(frontImage);
+
   const onClickReTakePhoto = () => {
     setBackImage(null);
     setFrontImage(null);
     setFrontReady(false);
+    setCanTakeShot(true);
     toggleCameraType();
   };
   const clickUsePhoto = async () => {
@@ -101,7 +92,7 @@ export default function CameraPage({ route, navigation }: Props) {
     const capturedPath = await getPhotoUri();
     const updatedPath = capturedPath.replace("/private/", "file:///");
     FileSystem.uploadAsync(
-      "http://172.16.230.168:8080/album/image/upload",
+      "https://eeho-b890d.du.r.appspot.com/album/image/upload",
       updatedPath,
       {
         fieldName: "profile",
@@ -154,6 +145,7 @@ export default function CameraPage({ route, navigation }: Props) {
                 style={styles.camera}
                 type={cameraType}
                 ratio="1:1"
+                onCameraReady={() => setCanTakeShot(true)}
               ></Camera>
             )}
             {!frontReady && !frontImage && (
