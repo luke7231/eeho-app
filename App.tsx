@@ -2,7 +2,6 @@ import { SafeAreaView, StatusBar, View } from "react-native";
 import Navigation from "./Navigation";
 import { useEffect } from "react";
 import styles from "./styles";
-const NOTCH_COLOR = "#FAFFF1";
 
 export default function App() {
   useEffect(() => {
