@@ -271,6 +271,7 @@ const styles = StyleSheet.create({
     height: 48,
   },
   resultText: {
+    paddingVertical: 10,
     color: "#fff",
   },
 });
