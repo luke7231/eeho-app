@@ -49,7 +49,6 @@ export default function Home({ navigation, route }: Props) {
   }
   const sendPostMessage = (token: string) => {
     webViewRef.current?.postMessage(token);
-    console.log(token, "완료");
   };
 
   useAndroidBackEffect(webViewRef);
@@ -61,7 +60,6 @@ export default function Home({ navigation, route }: Props) {
 
     async function naviToCamera(userIds: string[]) {
       const token = await AsyncStorage.getItem("jwt");
-      console.log(token, "async");
       if (!token) return;
       const tokenWithoutQuotes = token.replace(/^"(.*)"$/, "$1");
 
@@ -86,8 +84,7 @@ export default function Home({ navigation, route }: Props) {
         <View style={{ flex: 1 }}>
           <WebView
             ref={webViewRef}
-            source={{ uri: "http://172.16.231.51:3000" }}
-            // source={{ uri: "https://eeho-web.vercel.app" }}
+            source={{ uri: "https://eeho-web.vercel.app" }}
             onMessage={onMessage}
           />
         </View>

@@ -76,7 +76,6 @@ export default function CameraPage({ route, navigation }: Props) {
   }
   const getPhotoUri = async (): Promise<string> => {
     const uri = await (captureRef.current as any).capture();
-    console.log("😍" + uri);
     return uri;
   };
 
