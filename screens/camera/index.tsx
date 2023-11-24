@@ -109,9 +109,13 @@ export default function CameraPage({ route, navigation }: Props) {
       })
       .then((data) => {
         if (data.ok) {
-          navigation.navigate("Home");
+          navigation.navigate("Home", {
+            goToMain: {
+              ok: true,
+            },
+          });
         } else {
-          navigation.navigate("Home");
+          navigation.navigate("Home", { goToMain: { ok: false } });
         }
       });
   };

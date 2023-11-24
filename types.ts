@@ -1,4 +1,8 @@
 export type RootStackParamList = {
-  Home: undefined;
+  Home: {
+    goToMain?: {
+      ok: boolean;
+    };
+  };
   Camera: { token: string; userIds: string[] };
 };
