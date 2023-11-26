@@ -14,7 +14,11 @@
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.luke7299.eehoapp"
+      "bundleIdentifier": "com.luke7299.eehoapp",
+      "buildNumber": "2",
+      "infoPlist": {
+        "NSCameraUsageDescription": "당신의 순간을 가족들과 사진으로 공유하기 위해서는 카메라 기능이 필요합니다!"
+      }
     },
     "android": {
       "adaptiveIcon": {
