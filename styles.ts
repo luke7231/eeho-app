@@ -1,6 +1,6 @@
 import { Platform, StatusBar, StyleSheet } from "react-native";
 
-export const NOTCH_COLOR = "#FAFFF1";
+export const NOTCH_COLOR = "#fff";
 export const CAMERA_NOTCH_COLOR = "#162A0C";
 export default StyleSheet.create({
   safeAreaView: {
