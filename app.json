@@ -11,7 +11,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.luke7299.eehoapp",
@@ -38,6 +40,12 @@
       "eas": {
         "projectId": "84e5704a-f1cc-499a-91de-2cf5fff63e24"
       }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/84e5704a-f1cc-499a-91de-2cf5fff63e24"
     }
   }
 }
